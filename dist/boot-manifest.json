@@ -1,0 +1,20 @@
+{
+  "files": [
+    {
+      "path": "vendor/three.module.js",
+      "bytes": 1314681
+    },
+    {
+      "path": "vendor/OrbitControls.js",
+      "bytes": 32134
+    },
+    {
+      "path": "renewables.js",
+      "bytes": 318992
+    }
+  ],
+  "audio": {
+    "path": "assets/hydrogen-background.mp3",
+    "bytes": 223770
+  }
+}

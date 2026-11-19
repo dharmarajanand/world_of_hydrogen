@@ -1,0 +1,8 @@
+/* One voice per checkpoint; decoded before the city is revealed. */
+(()=>{
+const buffers=[];let source=null,index=-1,busy=false,serial=0,finished=null;
+async function prepare(){const context=window.atlasMusic.getContext();await Promise.all(Array.from({length:12},async(_,i)=>{const response=await fetch('./assets/voice/'+String(i+1).padStart(2,'0')+'.mp3');if(!response.ok)throw Error('Could not load checkpoint narration '+(i+1));buffers[i]=await context.decodeAudioData(await response.arrayBuffer());}));}
+function stop(){serial++;finished=null;busy=false;index=-1;if(source){source.onended=null;source.stop();source.disconnect();source=null;}window.atlasMusic.setDucked(false);}
+async function play(checkpoint,onFinished){stop();if(window.atlasMusic.state?.muted)return;const buffer=buffers[checkpoint];if(!buffer){onFinished?.();return;}const token=serial,context=window.atlasMusic.getContext();index=checkpoint;busy=true;finished=onFinished;window.atlasMusic.setDucked(true);try{await context.resume();if(token!==serial)return;const voice=context.createBufferSource();voice.buffer=buffer;voice.connect(context.destination);source=voice;voice.onended=()=>{if(token!==serial)return;voice.disconnect();source=null;busy=false;window.atlasMusic.setDucked(false);const callback=finished;finished=null;callback?.();};voice.start();}catch(error){if(token!==serial)return;busy=false;window.atlasMusic.setDucked(false);const callback=finished;finished=null;console.warn('Checkpoint narration unavailable',error);callback?.();}}
+window.atlasNarration={prepare,play,stop,get state(){return{index,busy,ready:buffers.filter(Boolean).length===12,durations:buffers.map(b=>b.duration)};}};
+})();
